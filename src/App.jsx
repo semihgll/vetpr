@@ -19,14 +19,21 @@ import {
   Building2,
   Calendar,
   Layers,
-  Trash2
+  Trash2,
+  LogOut,
+  User as UserIcon
 } from 'lucide-react';
+import { auth, logoutUser } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import PriceHistoryModal from './components/PriceHistoryModal';
 import PdfUploaderModal from './components/PdfUploaderModal';
 import MailSettingsModal from './components/MailSettingsModal';
 import InvoicesModal from './components/InvoicesModal';
+import AuthModal from './components/AuthModal';
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authChecking, setAuthChecking] = useState(true);
   const [theme, setTheme] = useState('dark');
   const [medicines, setMedicines] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -75,13 +82,25 @@ export default function App() {
   };
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthChecking(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     loadData();
-  }, [sort, order, search, selectedCategory]);
+  }, [sort, order, search, selectedCategory, currentUser]);
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
     document.documentElement.setAttribute('data-theme', next);
+  };
+
+  const handleLogout = async () => {
+    await logoutUser();
   };
 
   // Trigger E-Mail Fetch
@@ -102,7 +121,7 @@ export default function App() {
         setSyncNotice({ type: 'error', text: data.message });
       }
     } catch (err) {
-      setSyncNotice({ type: 'error', text: 'E-postalar taranırken bir hata oluştu.' });
+      setSyncNotice({ type: 'error', text: 'Mailler taranırken bir hata oluştu.' });
     } finally {
       setMailSyncing(false);
     }
@@ -138,7 +157,7 @@ export default function App() {
   const categories = ['All', 'Antibiyotik', 'Metabolik / Vitamin', 'Solunum / Antibiyotik', 'Anti-enflamatuar'];
 
   const handleClearData = async () => {
-    if (!window.confirm('Tüm test verilerini ve faturaları silmek istediğinize emin misiniz?')) return;
+    if (!window.confirm('Tüm kayıtlı ilaç ve fatura verileri silinecektir. Emin misiniz?')) return;
     try {
       const res = await fetch('/api/clear-data', { method: 'POST' });
       const data = await res.json();
@@ -153,6 +172,11 @@ export default function App() {
 
   return (
     <div className="app-container">
+      {/* Auth Modal overlay if not logged in */}
+      {!authChecking && !currentUser && (
+        <AuthModal onLoginSuccess={(user) => setCurrentUser(user)} />
+      )}
+
       {/* Header */}
       <header className="app-header">
         <div className="brand">
@@ -166,6 +190,20 @@ export default function App() {
         </div>
 
         <div className="header-actions">
+          {currentUser && (
+            <div className="user-profile-badge" title={currentUser.email}>
+              {currentUser.photoURL ? (
+                <img src={currentUser.photoURL} alt={currentUser.displayName || 'Kullanıcı'} className="user-avatar" />
+              ) : (
+                <UserIcon size={18} />
+              )}
+              <span className="user-name">{currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'Profil'}</span>
+              <button className="btn-icon" onClick={handleLogout} title="Çıkış Yap" style={{ width: 28, height: 28, border: 'none', background: 'transparent', padding: 0 }}>
+                <LogOut size={15} style={{ color: 'var(--accent-rose)' }} />
+              </button>
+            </div>
+          )}
+
           <button className="btn-icon" onClick={handleClearData} title="Test Verilerini Temizle" style={{ color: 'var(--accent-rose)' }}>
             <Trash2 size={18} />
           </button>
