@@ -3,6 +3,7 @@ import {
   getAuth, 
   GoogleAuthProvider, 
   signInWithPopup, 
+  signInWithRedirect,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut 
@@ -73,7 +74,17 @@ export const loginWithGoogle = async () => {
     return { user: result.user, error: null };
   } catch (error) {
     console.error("Google login error:", error);
-    return { user: null, error: error.message };
+    if (error.code === 'auth/popup-blocked') {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return { user: null, error: 'Tarayıcınız açılır pencereleri engellediği için sayfa yönlendiriliyor...' };
+      } catch (redirectErr) {
+        return { user: null, error: 'Açılır pencere engellendi. Lütfen tarayıcınızda pop-up engelleyicisini kapatın veya E-Posta / Şifre ile giriş yapın.' };
+      }
+    }
+    let msg = error.message;
+    if (error.code === 'auth/popup-closed-by-user') msg = 'Pencere kapatıldı. Lütfen tekrar deneyin.';
+    return { user: null, error: msg };
   }
 };
 
