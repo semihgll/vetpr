@@ -3,6 +3,8 @@ import {
   getAuth, 
   GoogleAuthProvider, 
   signInWithPopup, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut as firebaseSignOut 
 } from "firebase/auth";
 import { 
@@ -19,14 +21,14 @@ import {
   onSnapshot 
 } from "firebase/firestore";
 
-// Firebase Configuration (Uses Vite environment variables or fallback for local dev)
+// Firebase Configuration for Project 176236272832
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDemoKeyForVetPrLocalAppTesting",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "vetpr-app.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "vetpr-app",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "vetpr-app.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "1234567890",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1234567890:web:abcdef123456"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "vetpr-176236272832.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "vetpr-176236272832",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "vetpr-176236272832.appspot.com",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "176236272832",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || ""
 };
 
 // Initialize Firebase
@@ -35,7 +37,36 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 
-// Auth Helpers
+// Email / Password Authentication Helpers
+export const registerWithEmail = async (email, password) => {
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    return { user: result.user, error: null };
+  } catch (error) {
+    console.error("Email registration error:", error);
+    let msg = error.message;
+    if (error.code === 'auth/email-already-in-use') msg = 'Bu e-posta adresi zaten kullanımda.';
+    if (error.code === 'auth/weak-password') msg = 'Şifre en az 6 karakter olmalıdır.';
+    if (error.code === 'auth/invalid-email') msg = 'Geçersiz bir e-posta adresi girdiniz.';
+    return { user: null, error: msg };
+  }
+};
+
+export const loginWithEmail = async (email, password) => {
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    return { user: result.user, error: null };
+  } catch (error) {
+    console.error("Email login error:", error);
+    let msg = error.message;
+    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      msg = 'E-posta adresi veya şifre hatalı.';
+    }
+    return { user: null, error: msg };
+  }
+};
+
+// Google Auth Helper
 export const loginWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
@@ -46,6 +77,7 @@ export const loginWithGoogle = async () => {
   }
 };
 
+// Logout Helper
 export const logoutUser = async () => {
   try {
     await firebaseSignOut(auth);
