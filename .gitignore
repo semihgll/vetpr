@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+
+# Local env files
+.env
+.env.local
+*.log
+
+# Server uploads & local temp
+server/uploads/*
+!server/uploads/.gitkeep

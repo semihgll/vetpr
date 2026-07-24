@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="pillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded Squircle Background -->
+  <rect width="512" height="512" rx="120" fill="url(#bgGrad)"/>
+
+  <!-- Medical Cross Glow/Base -->
+  <rect x="216" y="90" width="80" height="240" rx="20" fill="#ffffff" opacity="0.2"/>
+  <rect x="136" y="170" width="240" height="80" rx="20" fill="#ffffff" opacity="0.2"/>
+
+  <!-- Veterinary Paw Print (White) -->
+  <g fill="#ffffff">
+    <!-- Main Paw Pad -->
+    <path d="M256 265 c-40 0 -72 26 -72 58 0 24 20 44 48 44 14 0 16 -8 24 -8 8 0 10 8 24 8 28 0 48 -20 48 -44 0 -32 -32 -58 -72 -58z"/>
+    <!-- Toes -->
+    <ellipse cx="170" cy="235" rx="22" ry="32" transform="rotate(-22 170 235)"/>
+    <ellipse cx="225" cy="198" rx="22" ry="34" transform="rotate(-7 225 198)"/>
+    <ellipse cx="287" cy="198" rx="22" ry="34" transform="rotate(7 287 198)"/>
+    <ellipse cx="342" cy="235" rx="22" ry="32" transform="rotate(22 342 235)"/>
+  </g>
+
+  <!-- Medicine Pill / Capsule Badge (Bottom Right Accent) -->
+  <g transform="translate(140, 310) rotate(-35)">
+    <rect x="0" y="0" width="170" height="74" rx="37" fill="url(#pillGrad)" stroke="#ffffff" stroke-width="10"/>
+    <line x1="85" y1="0" x2="85" y2="74" stroke="#ffffff" stroke-width="8"/>
+    <circle cx="42" cy="37" r="10" fill="#ffffff" opacity="0.6"/>
+  </g>
+</svg>
